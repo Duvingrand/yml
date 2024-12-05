@@ -1,49 +1,50 @@
-name: "Testeo de la aplicación"
+name : "Testeo de la aplicacion"
 
 on:
-  push:
-    branches:
-      - main
-  pull_request:
-    branches:
-      - main
+    push:
+        branches:
+            - release
+    pull_request:
+        branches:
+            - release
 
 jobs:
-  build:
-    runs-on: ubuntu-latest
+    #primer job
+    Testing:
+        runs-on: ubuntu-latest
+        steps:
+            - name: pase el codigo hacia el ubuntu
+              uses: actions/checkout@v3
 
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v3
+            - name: instalo php en mi ambiente
+              uses: shivammathur/setup-php@v2
+              with:
+                php-version: '8.3'
+                extensions: mbstring, pdo, bcmath
+                ini-values: post_max_size=256M, upload_max_filesize=256M
+                coverage: none
 
-      - name: Set up PHP
-        uses: shivammathur/setup-php@v2
-        with:
-          php-version: "8.3"
-          extensions: mbstring, pdo, bcmath
-          ini-values: post_max_size=256M, upload_max_filesize=256M
-          coverage: none
+            - name: descarge los paquetes de composer
+              run: composer install --no-progress --no-suggest --prefer-dist --optimize-autoloader
 
-      - name: descarge los paquetes de composer
-        run: composer install --no--progress --no-suggest --prefer-dist --optimize-autoloader
+            - name: Create .env file
+              run: |
+                  cp .env.example .env
 
-      - name: Crear .env file
-        run:
-            cp -env.example .env
+            - name: Generate application key
+              run: php artisan key:generate
 
-      - name: Generate aplication key
-        run: php artisan key:generate
+            - name: Instalar node js para nuestro ubut
+              uses: actions/setup-node@v3
+              with:
+                node-version: '22'
 
-      - name: node installation to ubuntu
-        run: actions/setup-node@v3
-        with:
-          node-version: "22"
+            - name: instalamos los paquetes de node js
+              run: npm install
 
-      - name: instalamos los paquetes de node js
-        run: npm install
+            - name: Compilamos el fronten
+              run: npm run build
 
-      - name: compilamos front
-        run: npm run build
-
-      - name: Run migrations
-        run: php artisan test
+            - name: Run migrations
+              run: php artisan test
+    
