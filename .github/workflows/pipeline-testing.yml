@@ -1,0 +1,24 @@
+name: "Testeo de la aplicación"
+
+on:
+  push:
+    branches:
+      - release
+    pull_request:
+      branches:
+        - release
+
+jobs:
+  Testing:
+  runs-on: ubuntu-latest
+  steps:
+      - name: "Testeo de la aplicación"
+        uses: actions/checkout@v3
+
+      - name: set up php
+        uses: shivammathur/setup-php@v2
+        with:
+            php-version: "8.3"
+            extensions: mbstring, pdo, bcmath
+            ini-values: post_max_size=256M, upload_max_filesize=256M
+            coverage: none
